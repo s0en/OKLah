@@ -16,7 +16,29 @@ spec:
         - name: ghcr-creds
       containers:
         - name: api
-          image: ghcr.io/s0en/oklah-api:0.1.0
+          image: ghcr.io/s0en/oklah-api:0.1.1
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
+
+          env:
+            - name: PORT
+              value: "8080"
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
