@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oklah-api
+  labels:
+    app: oklah-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: oklah-api
+  template:
+    metadata:
+      labels:
+        app: oklah-api
+    spec:
+      containers:
+        - name: api
+          image: oklah-api:latest
+          imagePullPolicy: IfNotPresent

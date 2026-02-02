@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: oklah
+      POSTGRES_USER: oklah
+      POSTGRES_PASSWORD: oklah
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  api:
+    image: oklah-api:dev
+    build:
+      context: ../../services/api
+    environment:
+      DATABASE_URL: postgres://oklah:oklah@db:5432/oklah?sslmode=disable
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev_only_change_me
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  db_data:

@@ -1,0 +1,32 @@
+# Plan: Generate Feature Spec from Functional Spec
+
+**Purpose:** Convert a functional spec in `docs/functional/` into a detailed feature spec under `specs/<feature>/spec.md`.
+
+## Inputs
+- A chosen functional spec file, e.g. `docs/functional/02-daily-checkin.md`
+
+## Output
+- `specs/<feature>/spec.md` using `.specify/templates/spec-template.md`
+- Optional: `specs/<feature>/plan.md` using `.specify/templates/plan-template.md`
+
+## Steps (for Speckit/Specify or manual)
+1. Read the functional spec end-to-end.
+2. Extract:
+   - User stories + acceptance criteria
+   - Business rules (edge cases)
+   - API endpoints + events
+   - Data model entities
+   - UI flows (Flutter + forui)
+3. Fill `specs/<feature>/spec.md`.
+4. List open questions explicitly.
+
+## Suggested prompt (copy/paste)
+
+You are the product+engineering assistant. Create a Feature Specification for OKLah.
+
+- Follow `.specify/templates/spec-template.md`
+- Base it strictly on: <PASTE FUNCTIONAL SPEC>
+- Keep Phase 1 privacy rules: anonymous by default; no GPS stored by default
+- If proposing new data fields, explain why they are necessary
+
+Output a single markdown file: `specs/<feature>/spec.md`

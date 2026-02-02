@@ -1,0 +1,25 @@
+# Plan: Generate Implementation Plan & Tasks from Feature Spec
+
+**Purpose:** Convert `specs/<feature>/spec.md` into an implementation plan and task list.
+
+## Inputs
+- `specs/<feature>/spec.md`
+
+## Outputs
+- `specs/<feature>/plan.md` using `.specify/templates/plan-template.md`
+- `specs/<feature>/tasks.md` using `.specify/templates/tasks-template.md`
+
+## Rules
+- All tasks must reference code locations under:
+  - `apps/mobile/` (Flutter) and/or
+  - `services/api/` (Go backend)
+- Include tests tasks (unit/integration) for whichever side is affected.
+- Include a final task: update FSD/functional docs if the implementation changes reality.
+
+## Suggested feature order (Phase 1)
+1. FS-01 Anonymous onboarding
+2. FS-02 Daily check-in
+3. FS-03 Thresholds & nudges
+4. FS-04 Gamification
+5. Basic analytics & privacy UI
+

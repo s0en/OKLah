@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+
+    // Phase 1: anonymous users can only read/write their own profile and check-ins
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+
+    match /checkins/{docId} {
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow update, delete: if false; // append-only
+    }
+
+    match /events/{eventId} {
+      allow create: if isSignedIn(); // server should create; allow client only if you want lightweight logging
+      allow read: if false; // operator uses BigQuery/console; no client reads
+    }
+
+    // Premium PII (locked down further; only owner reads; writes via function recommended)
+    match /premium_profiles/{uid} {
+      allow read: if isOwner(uid);
+      allow write: if false; // force via Cloud Function for validation + consent logging
+    }
+
+    // Nudges are created by server; client can read own nudge status
+    match /nudges/{nudgeId} {
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create, update, delete: if false;
+    }
+  }
+}
