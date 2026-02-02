@@ -1,25 +1,81 @@
-# Plan: Generate Implementation Plan & Tasks from Feature Spec
+# Plan: Generate Implementation Plan & Tasks from Approved Specs (OKLah)
 
-**Purpose:** Convert `specs/<feature>/spec.md` into an implementation plan and task list.
+**Purpose:** Convert an approved OKLah FSD spec into an implementation plan and task list, aligned to the OKLah workflow:
+PRD → Speckit Specify/Clarify → Speckit Plan → Speckit Tasks → Code → Beta.
 
-## Inputs
-- `specs/<feature>/spec.md`
+---
+
+## Inputs (Source of Truth)
+
+- PRD slice:
+  - `docs/prd/<OKL-PRD-xxx-*.md>`
+- Approved spec (output of `speckit.specify` + `speckit.clarify`):
+  - `docs/fsd/<module>/<submodule>/spec.md`
+- Architecture/NFR plan (output of `speckit.plan`):
+  - `plans/<OKL-PRD-xxx>.plan.md` (or `docs/decisions/ADR-*` references)
+
+---
 
 ## Outputs
-- `specs/<feature>/plan.md` using `.specify/templates/plan-template.md`
-- `specs/<feature>/tasks.md` using `.specify/templates/tasks-template.md`
 
-## Rules
-- All tasks must reference code locations under:
+Choose one consistent output strategy:
+
+### Option A (Recommended): Plans in `plans/`
+- Implementation plan:
+  - `plans/<OKL-PRD-xxx>.implementation.md` using `.specify/templates/plan-template.md`
+- Task list:
+  - `plans/<OKL-PRD-xxx>.tasks.md` using `.specify/templates/tasks-template.md`
+
+### Option B: Plans next to the spec (only if you prefer locality)
+- Implementation plan:
+  - `docs/fsd/<module>/<submodule>/plan.md`
+- Task list:
+  - `docs/fsd/<module>/<submodule>/tasks.md`
+
+**Rule:** pick A or B for the repo and never mix both.
+
+---
+
+## Task Authoring Rules (Non-negotiable)
+
+- Every task must reference:
+  - the PRD ID (e.g., `OKL-PRD-001`)
+  - the spec section ID / heading (or requirement ID inside spec)
+- Tasks must reference code locations under:
   - `apps/mobile/` (Flutter) and/or
-  - `services/api/` (Go backend)
-- Include tests tasks (unit/integration) for whichever side is affected.
-- Include a final task: update FSD/functional docs if the implementation changes reality.
+  - `services/firebase/` (Firebase Functions / rules / config) and/or
+  - `services/api/` (Go backend, if used)
+- Include test tasks appropriate to impacted area:
+  - Mobile: unit + widget tests (minimum), integration if relevant
+  - Firebase: function tests + rules tests (if rules change)
+  - API: unit + integration tests
+- Include observability tasks when applicable:
+  - analytics events
+  - logging
+  - error handling paths
+- Final task must be:
+  - **Docs reality check:** update `docs/fsd/**/spec.md` and/or PRD if implementation required changes.
 
-## Suggested feature order (Phase 1)
-1. FS-01 Anonymous onboarding
-2. FS-02 Daily check-in
-3. FS-03 Thresholds & nudges
-4. FS-04 Gamification
-5. Basic analytics & privacy UI
+---
 
+## Suggested Delivery Order (MVP/Beta)
+
+Use PRD slices as the delivery sequence.
+
+1. OKL-PRD-001 — Onboarding + First Check-in  
+2. OKL-PRD-002 — Missed Check-in + Nudges + Recovery  
+3. OKL-PRD-003 — Streaks + Achievements + Beta Feedback  
+
+(You can optionally track features as `OKL-FS-xx`, but delivery should remain PRD-driven.)
+
+---
+
+## Definition of Done (for a PRD slice)
+
+A PRD slice is considered complete when:
+- acceptance criteria in spec pass
+- tests added/updated
+- analytics events emitted
+- no open clarifications remain
+- included in a beta build
+- docs are updated to match reality

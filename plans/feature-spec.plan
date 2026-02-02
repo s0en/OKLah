@@ -1,32 +1,200 @@
-# Plan: Generate Feature Spec from Functional Spec
+# OKLah — Feature Specification & Delivery Plan
 
-**Purpose:** Convert a functional spec in `docs/functional/` into a detailed feature spec under `specs/<feature>/spec.md`.
+This document defines the **authoritative workflow** for taking OKLah
+from approved product intent to a shipped beta feature.
 
-## Inputs
-- A chosen functional spec file, e.g. `docs/functional/02-daily-checkin.md`
+It exists to ensure:
+- clear ownership by role
+- no duplicate artifacts
+- strict traceability from business intent to code
+- predictable delivery using Speckit
 
-## Output
-- `specs/<feature>/spec.md` using `.specify/templates/spec-template.md`
-- Optional: `specs/<feature>/plan.md` using `.specify/templates/plan-template.md`
+---
 
-## Steps (for Speckit/Specify or manual)
-1. Read the functional spec end-to-end.
-2. Extract:
-   - User stories + acceptance criteria
-   - Business rules (edge cases)
-   - API endpoints + events
-   - Data model entities
-   - UI flows (Flutter + forui)
-3. Fill `specs/<feature>/spec.md`.
-4. List open questions explicitly.
+## 1. Scope of This Plan
 
-## Suggested prompt (copy/paste)
+This plan governs **all feature work** in the OKLah repository for the MVP/Beta phase.
 
-You are the product+engineering assistant. Create a Feature Specification for OKLah.
+It applies to:
+- new features
+- change requests (CR)
+- refinements discovered during beta
 
-- Follow `.specify/templates/spec-template.md`
-- Base it strictly on: <PASTE FUNCTIONAL SPEC>
-- Keep Phase 1 privacy rules: anonymous by default; no GPS stored by default
-- If proposing new data fields, explain why they are necessary
+Bug fixes that do not change product behavior may bypass PRD creation but must still reference an existing spec.
 
-Output a single markdown file: `specs/<feature>/spec.md`
+---
+
+## 2. Canonical Inputs (Source of Truth)
+
+No work may begin unless the following artifacts exist and are approved.
+
+### Business Intent
+- **BRF**
+  - `docs/brf/OKL-BRF-001.md`
+
+### Business Requirements
+- **BRD**
+  - `docs/brd/OKL-BRD-001.md`
+
+### Product Scope (Deliverable Slices)
+- **PRDs**
+  - `docs/prd/OKL-PRD-001-onboarding-first-checkin.md`
+  - `docs/prd/OKL-PRD-002-missed-checkin-nudges.md`
+  - `docs/prd/OKL-PRD-003-streaks-achievements-feedback.md`
+
+Each PRD represents a **shippable slice** that can be completed within 1–2 sprints.
+
+---
+
+## 3. Phase 1 — Product Definition (Product Owner)
+
+**Owner:** Product Owner (PO)
+
+The PO is responsible for defining and maintaining:
+- BRF (why)
+- BRD (what – business)
+- PRDs (what – deliverable)
+
+### Exit Criteria
+A PRD may proceed to specification only when:
+- scope is explicit and bounded
+- success criteria are stated
+- no implementation decisions are embedded
+
+---
+
+## 4. Phase 2 — Specification (Business Analyst)
+
+**Owner:** Business Analyst (BA)
+
+### 4.1 Specify
+For each approved PRD, the BA runs:
+
+- `speckit.specify` (PRD as input)
+
+Outputs:
+- `docs/fsd/<module>/<submodule>/spec.md`
+- Updated `docs/fsd/<module>/INDEX.md`
+
+Each spec must include:
+- functional behavior
+- acceptance criteria
+- edge cases and constraints
+- data inputs/outputs (at business level)
+
+---
+
+### 4.2 Clarify
+After initial spec creation, the BA runs:
+
+- `speckit.clarify`
+
+This step resolves:
+- ambiguity
+- missing acceptance criteria
+- scope gaps
+- conflicting assumptions
+
+If clarifications introduce product-level changes:
+- PRD must be updated
+- `speckit.clarify` is re-run
+
+### Exit Criteria
+- All clarifications resolved
+- Spec is implementation-ready
+- No open questions remain
+
+---
+
+## 5. Phase 3 — Architecture & Non-Functional Planning (Solution Architect)
+
+**Owner:** Solution Architect (SA)
+
+### 5.1 Plan
+Using clarified specs, the SA runs:
+
+- `speckit.plan`
+
+Outputs:
+- architecture overview
+- non-functional requirements (NFRs)
+- trade-offs and constraints
+- ADRs stored in `docs/decisions/`
+
+NFRs must explicitly cover:
+- privacy & data handling
+- security
+- reliability & observability
+- scalability assumptions (even if deferred)
+
+---
+
+### 5.2 Verification
+The SA reviews the plan with the BA to ensure:
+- specs are correctly interpreted
+- no unintended scope is added
+- constraints are understood by all parties
+
+### Exit Criteria
+- Plan approved
+- ADRs captured for irreversible decisions
+
+---
+
+## 6. Phase 4 — Task Breakdown & Scheduling (Engineering Lead)
+
+**Owner:** Engineering Lead (EL)
+
+### 6.1 Task Generation
+The EL runs:
+
+- `speckit.tasks`
+
+Inputs:
+- approved specs
+- approved plan
+
+Outputs:
+- implementation tasks sized for ≤ 1 week each
+
+---
+
+### 6.2 Work Tracking
+- Tasks are created in JIRA (or equivalent)
+- **Epic:** BRF (`OKL-BRF-001`)
+- Tasks reference:
+  - PRD ID
+  - spec section ID
+
+No task may exist without traceability to a spec.
+
+---
+
+## 7. Phase 5 — Implementation (Software Engineer)
+
+**Owner:** Software Engineer (SE)
+
+### 7.1 Build
+Implementation is performed using:
+- Cursor (manual or hybrid)
+- specs as the primary reference
+
+### 7.2 Quality Gates
+Mandatory:
+- pre-commit checks
+- code review
+- basic test coverage for new behavior
+
+### 7.3 Tracking
+- Task status and time logs updated in JIRA
+
+---
+
+## 8. Phase 6 — Beta Release
+
+**Owner:** Engineering Lead / SE
+
+- Follow `docs/runbooks/beta-release.md`
+- Generate beta build artifacts
+- Upload to TestFlight / Google Play Internal Testing
+- Perform smoke tests
