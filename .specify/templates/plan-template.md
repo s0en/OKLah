@@ -1,104 +1,132 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: [FEATURE_NAME]
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
+**Spec Reference**: specs/[spec-name]/spec.md
+**Version**: 1.0.0
+**Author**: [Author Name]
+**Created**: [DATE]
 
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
+---
 
-## Summary
+## Constitution Compliance Check
 
-[Extract from feature spec: primary requirement + technical approach from research]
+### Applicable Principles
 
-## Technical Context
+| Principle | Compliant | Notes |
+|-----------|-----------|-------|
+| TypeScript Strict Mode | Yes/No | [Notes] |
+| FSD-Speckit Sync | Yes/No | [Notes] |
+| Documentation Traceability | Yes/No | [Notes] |
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
+### Potential Violations
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+[List any principles that need special attention or exceptions]
 
-## Constitution Check
+---
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+## FSD Impact Analysis
 
-[Gates determined based on constitution file]
+### Modules Affected
 
-## Project Structure
+| Module | Impact | Changes Required |
+|--------|--------|------------------|
+| module_XX_name | High/Medium/Low | [Description] |
 
-### Documentation (this feature)
+### FSD Updates Plan
 
-```text
-specs/[###-feature]/
-├── plan.md              # This file (/speckit.plan command output)
-├── research.md          # Phase 0 output (/speckit.plan command)
-├── data-model.md        # Phase 1 output (/speckit.plan command)
-├── quickstart.md        # Phase 1 output (/speckit.plan command)
-├── contracts/           # Phase 1 output (/speckit.plan command)
-└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
+1. `module_XX_name/INDEX.md`:
+   - Add new endpoint: `POST /api/v1/resource`
+   - Add new field to data model
+
+2. `module_XX_name/XX_submodule/spec.md`:
+   - Create new spec for [feature]
+
+---
+
+## Architecture Overview
+
+### Component Diagram
+
+```mermaid
+flowchart TD
+    A[Client] --> B[Controller]
+    B --> C[Service]
+    C --> D[Repository]
+    D --> E[(Database)]
 ```
 
-### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
+### Key Design Decisions
 
-```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+| Decision | Rationale | Alternatives Considered |
+|----------|-----------|------------------------|
+| [Decision 1] | [Why] | [Options] |
 
-tests/
-├── contract/
-├── integration/
-└── unit/
+---
 
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
+## Implementation Approach
 
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
+### Phase 1: Foundation
+- Set up data models
+- Create repository layer
+- Write unit tests
 
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
+### Phase 2: Business Logic
+- Implement service layer
+- Add validation
+- Write integration tests
 
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
-```
+### Phase 3: API Layer
+- Create controller
+- Add DTOs
+- Document endpoints
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+### Phase 4: FSD Update
+- Update INDEX.md
+- Create/update spec.md
+- Run gap analysis
 
-## Complexity Tracking
+---
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
+## Dependencies
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+### Internal Dependencies
+- [Service/Module] - [Purpose]
+
+### External Dependencies
+- [Library/Service] - [Purpose]
+
+---
+
+## Testing Strategy
+
+| Test Type | Coverage Target | Priority |
+|-----------|-----------------|----------|
+| Unit Tests | 80% | High |
+| Integration Tests | Key flows | High |
+| E2E Tests | Happy path | Medium |
+
+---
+
+## Risks & Mitigations
+
+| Risk | Probability | Impact | Mitigation |
+|------|-------------|--------|------------|
+| [Risk 1] | High/Med/Low | High/Med/Low | [Strategy] |
+
+---
+
+## Success Criteria
+
+- [ ] All acceptance criteria from spec met
+- [ ] Unit test coverage >= 80%
+- [ ] No critical/high severity bugs
+- [ ] FSD documentation updated
+- [ ] Code review approved
+
+---
+
+## Approvals
+
+| Role | Name | Date | Signature |
+|------|------|------|-----------|
+| Tech Lead | | | |
+| Architect | | | |
