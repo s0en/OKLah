@@ -188,7 +188,7 @@ erDiagram
         boolean synced "Whether synced to backend"
     }
     StreakData {
-        string user_id PK_FK "References AnonymousUser"
+        string user_id PK,FK "References AnonymousUser"
         int current_streak "Current consecutive day count"
         date streak_start_date "Date the current streak began"
         date last_checkin_date "Most recent check-in date (local)"

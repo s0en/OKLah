@@ -30,3 +30,6 @@ The Onboarding module covers the user's journey from first app launch to complet
 - Auth provider (e.g., Firebase Anonymous Auth) for anonymous identity
 - Local device storage for persistence
 - Backend data store for sync
+
+## Decisions / Constraints
+- PRD-001 escalation decisions tracked in: scratch/prd/escalations/OKL-PRD-001-escalations.md
