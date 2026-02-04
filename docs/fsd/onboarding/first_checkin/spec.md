@@ -20,7 +20,7 @@
 
 ### 1.1 Purpose
 
-This submodule defines the functional behavior of the user's first check-in — the moment on the Home screen where a newly onboarded user taps "I'm OK," the system records the event, displays confirmation, and initializes the streak to Day 1. This is the "first value" moment of OKLah.
+This submodule is the **canonical specification for all daily check-in behavior** in OKLah. It covers the first check-in (streak initialization to Day 1), subsequent daily check-ins (streak increment for Day 2+), the Home screen check-in UI across all states, local-first persistence, backend sync, and deduplication. The first check-in is the "first value" moment of OKLah.
 
 ### 1.2 Scope
 
@@ -29,17 +29,30 @@ This submodule defines the functional behavior of the user's first check-in — 
 - Home screen layout with "I'm OK" check-in action
 - Check-in event recording (local + backend)
 - Confirmation UI (timestamp display)
-- Streak initialization (Day 1)
+- Streak initialization (Day 1) and streak increment (Day 2+)
+- Streak reset on missed day
 - Last check-in timestamp display on Home screen
 - Data persistence across app restarts
+- One-check-in-per-day deduplication
+- Backend sync with foreground retry
 
 **Out of Scope:**
 
-- Subsequent check-ins beyond Day 1 (same mechanics, but streak increment logic for Day 2+ is a separate spec)
-- Missed check-in detection and nudges
-- Achievements beyond streak start
+- Missed check-in detection and nudges (separate module — consumes `last_checkin_date`)
+- Achievements beyond streak counter
 - Settings or threshold configuration
 - Emergency contacts or escalation
+- Streak recovery UX (e.g., "freeze" or "forgive" a missed day)
+
+## Clarifications
+
+### Session 2025-02-04
+
+- Q: What triggers a backend sync retry for unsynced check-in records? → A: App foreground — retry all unsynced records each time the app is opened or foregrounded.
+- Q: Is StreakData synced to the backend or local-only? → A: Local-only. StreakData is a local cache derived from CheckIn records. Backend can recompute from synced check-in history if needed.
+- Q: What should happen when the user re-taps "I'm OK" after already checking in today? → A: Show a brief toast/snackbar "You're already checked in today!" that auto-dismisses after ~2 seconds.
+- Q: What format should the check-in timestamp use on the Home screen? → A: Absolute localized format ("Today at 10:30 AM", "Yesterday at 3:15 PM", "Feb 1 at 9:00 AM").
+- Q: Is this spec the canonical reference for all daily check-in behavior, or strictly Day 1? → A: Canonical. This is the single check-in spec covering all daily check-ins including streak increment for Day 2+.
 
 ### 1.3 Actors
 
@@ -81,7 +94,7 @@ This submodule defines the functional behavior of the user's first check-in — 
 - [ ] Given the user has completed a check-in, when the Home screen is displayed, then the last check-in timestamp is visible
 - [ ] Given the user has just completed a check-in, when the confirmation is shown, then the timestamp updates immediately (no page refresh needed)
 - [ ] Given the user reopens the app after a check-in, when the Home screen loads, then the last check-in timestamp is displayed from persisted data
-- [ ] Given the timestamp is displayed, then it is shown in a human-friendly relative or absolute format localized to the user's device locale and timezone
+- [ ] Given the timestamp is displayed, then it is shown in absolute localized format: "Today at HH:MM AM/PM" for same-day, "Yesterday at HH:MM AM/PM" for previous day, "MMM D at HH:MM AM/PM" for older dates — all localized to the user's device locale and timezone
 
 **Priority:** HIGH
 **Story Points:** 3
@@ -128,8 +141,8 @@ This submodule defines the functional behavior of the user's first check-in — 
 
 **Description:** A user can perform at most one meaningful check-in per calendar day (based on the user's local device timezone).
 **Condition:** User taps "I'm OK" when a check-in for today already exists.
-**Action:** The system acknowledges the tap gracefully but does not create a duplicate check-in record. The existing timestamp is retained. The UI may show an affirmation (e.g., "You're already checked in today") or simply display the existing confirmation.
-**Error Message:** None — this is not an error state. Handled gracefully in the UI.
+**Action:** The system does not create a duplicate check-in record. The existing timestamp is retained. The system shows a brief toast/snackbar message: "You're already checked in today!" that auto-dismisses after ~2 seconds. The existing post-check-in confirmation state remains unchanged underneath.
+**Error Message:** None — this is not an error state.
 
 ---
 
@@ -137,6 +150,24 @@ This submodule defines the functional behavior of the user's first check-in — 
 
 **Description:** The first successful check-in sets the streak counter to 1.
 **Condition:** User has zero prior check-ins.
+**Action:** Set `current_streak = 1`, set `streak_start_date` to today, set `last_checkin_date` to today.
+**Error Message:** N/A.
+
+---
+
+### BR-CHK-006: Streak Increments on Consecutive Day Check-in
+
+**Description:** When a user checks in on a day immediately following their last check-in date, the streak counter increments by 1.
+**Condition:** `last_checkin_date` equals yesterday (in device local timezone) at the time of a new check-in.
+**Action:** Set `current_streak = current_streak + 1`, set `last_checkin_date` to today.
+**Error Message:** N/A.
+
+---
+
+### BR-CHK-007: Streak Resets on Missed Day
+
+**Description:** When a user checks in after missing one or more days, the current streak resets to 1.
+**Condition:** `last_checkin_date` is earlier than yesterday (in device local timezone) at the time of a new check-in.
 **Action:** Set `current_streak = 1`, set `streak_start_date` to today, set `last_checkin_date` to today.
 **Error Message:** N/A.
 
@@ -155,7 +186,7 @@ This submodule defines the functional behavior of the user's first check-in — 
 
 **Description:** Check-in data is always written to local device storage first, then synced to backend.
 **Condition:** Every check-in.
-**Action:** Write to local store immediately upon tap. Queue backend sync. If backend sync fails, the check-in is still considered valid locally and will retry sync later.
+**Action:** Write to local store immediately upon tap. Attempt backend sync. If backend sync fails, the record remains unsynced locally (`synced = false`). On every app foreground event, the system retries syncing all unsynced records. No background sync or connectivity-change listeners are used for MVP.
 **Error Message:** N/A (backend sync failure is invisible to the user).
 
 ---
@@ -207,7 +238,9 @@ erDiagram
 | local_date | date | Yes | Current device date | Calendar date in user's local timezone (for dedup and streak logic) |
 | synced | boolean | Yes | false | Whether this record has been synced to backend |
 
-#### StreakData
+#### StreakData (Local-Only — Derived Cache)
+
+> **StreakData is not synced to the backend.** It is a local denormalized cache computed from `CheckIn` records. If local data is lost, the backend can recompute streak from synced check-in history.
 
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
@@ -433,7 +466,7 @@ getLatestCheckIn(user_id)
 | Action | Trigger | Behavior |
 |--------|---------|----------|
 | Check in | Tap "I'm OK" (pre-check-in state) | Record check-in → update timestamp → initialize/update streak → show confirmation |
-| Re-tap after check-in | Tap "I'm OK" (post-check-in state) | Show gentle acknowledgement; no duplicate record created |
+| Re-tap after check-in | Tap "I'm OK" (post-check-in state) | Show toast/snackbar "You're already checked in today!" (~2s auto-dismiss); no duplicate record created |
 
 ---
 
@@ -449,7 +482,7 @@ flowchart TD
     UPDATE_STREAK --> UPDATE_UI[Show confirmation + timestamp + streak]
     UPDATE_UI --> SYNC_BACKEND[Sync check-in to backend]
     SYNC_BACKEND -->|Success| MARK_SYNCED[Mark record as synced]
-    SYNC_BACKEND -->|Failure| QUEUE_RETRY[Queue for retry on next connectivity]
+    SYNC_BACKEND -->|Failure| QUEUE_RETRY[Remain unsynced — retry on next app foreground]
     MARK_SYNCED --> DONE([Done])
     QUEUE_RETRY --> DONE
     SHOW_CONFIRMATION --> DONE
@@ -463,7 +496,7 @@ flowchart TD
 | 2 | System | No check-in found | Display "I'm OK" button in active state |
 | 3 | User | Tap "I'm OK" | Disable button (prevent double-tap) |
 | 4 | System | Write check-in to local store | Record `checked_in_at` (UTC) and `local_date` |
-| 5 | System | Update streak data | Set `current_streak = 1`, `last_checkin_date = today` |
+| 5 | System | Update streak data | If first check-in: set `current_streak = 1` (BR-CHK-002). If consecutive day: increment `current_streak` (BR-CHK-006). If missed day(s): reset `current_streak = 1` (BR-CHK-007). Set `last_checkin_date = today`. |
 | 6 | System | Update UI | Show confirmation, timestamp, streak counter |
 | 7 | System | Sync to backend (async) | Send check-in record; mark synced on success |
 | 8 | System | Fire `checkin_completed` event | Analytics recorded |
@@ -539,6 +572,7 @@ stateDiagram-v2
 | 6 | Backend already has a check-in for today (e.g., from another device — unlikely with anonymous accounts) | Backend returns CHECKIN_ALREADY_EXISTS; local record is retained; no user-facing error. |
 | 7 | App is open across midnight (date boundary) | The screen does not auto-refresh. User will see updated state on next app open or foregrounding. Assumption: no real-time date-change listener needed for MVP. |
 | 8 | First check-in fails locally, user retries and succeeds | Streak initializes to 1 on the successful attempt. No partial state. |
+| 9 | Local StreakData lost (e.g., after re-auth recovery with data migration) | Rebuild StreakData by scanning local CheckIn records. If local CheckIn records are also lost, fetch check-in history from backend and recompute. |
 
 ---
 
@@ -594,11 +628,11 @@ No additional device permissions required for check-in.
 
 | # | Question | Status | Decision |
 |---|----------|--------|----------|
-| 1 | What format should the timestamp display use? Relative ("2 hours ago") vs. absolute ("Today at 10:30 AM") vs. both? | Open | Assumed: Absolute format localized to device locale for clarity. Can revisit for UX polish. |
+| 1 | What format should the timestamp display use? Relative ("2 hours ago") vs. absolute ("Today at 10:30 AM") vs. both? | Resolved | Absolute localized: "Today at HH:MM", "Yesterday at HH:MM", "MMM D at HH:MM" for older. See US-CHK-002 AC. |
 | 2 | Should the "I'm OK" button animate or provide haptic feedback on tap? | Open | Assumed: Yes, a brief visual confirmation (e.g., ripple, scale) and optional haptic. Exact design TBD by UI/UX. |
 | 3 | Should the streak display be prominent or subtle for Day 1? | Open | Assumed: Visible but not dominant — the confirmation and timestamp are the primary feedback. Streak becomes more prominent as it grows. |
-| 4 | What happens to the streak if the user misses a day? (Reset to 0? Keep longest streak?) | Open | Assumed: Current streak resets to 0 on a missed day. Longest streak can be tracked separately. This is out of scope for first-check-in spec but noted for downstream. |
-| 5 | Should re-tapping "I'm OK" after check-in show a specific message or just do nothing? | Open | Assumed: Show a gentle affirmation (e.g., "You're already checked in today!") rather than no response. |
+| 4 | What happens to the streak if the user misses a day? (Reset to 0? Keep longest streak?) | Resolved | Current streak resets to 1 on next check-in after a missed day (BR-CHK-007). Longest streak tracking deferred to achievements module. |
+| 5 | Should re-tapping "I'm OK" after check-in show a specific message or just do nothing? | Resolved | Show toast/snackbar "You're already checked in today!" (~2s auto-dismiss). See BR-CHK-001. |
 | 6 | How should the app handle a date change while the app is open in the foreground? | Open | Assumed: No real-time date-change listener for MVP. User sees updated state on next foreground/reopen. |
 
 ---
@@ -647,7 +681,7 @@ No additional device permissions required for check-in.
 |---|-----------|-----------|
 | 1 | Local-first persistence means the check-in is confirmed to the user before backend sync | Per privacy-first and minimal-friction constraints; user should not wait for network |
 | 2 | Calendar day boundary uses device local timezone | Simplest UX; server-side can normalize to UTC for analytics |
-| 3 | Streak logic for Day 2+ is handled in a separate spec | This spec covers only the initialization (Day 1) per PRD scope |
+| 3 | This spec is the canonical check-in spec covering Day 1 and all subsequent days | Streak increment (BR-CHK-006) and reset (BR-CHK-007) included |
 | 4 | No haptic/sound feedback is required for MVP but is permitted | UX polish; not a functional requirement |
 | 5 | The Home screen is a single-screen experience for MVP (no tabs, no navigation drawer) | Per PRD §4: "Home screen: single dominant action" |
 | 6 | Backend sync uses an idempotent write (upsert by user_id + local_date) | Prevents duplicates if sync retries occur |
