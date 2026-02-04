@@ -1,149 +1,115 @@
-# Feature Specification: [FEATURE_NAME]
+# Feature Specification: [FEATURE NAME]
 
-**Version**: 1.0.0
-**Status**: Draft | In Review | Approved
-**Author**: [Author Name]
-**Created**: [DATE]
-**FSD Reference**: module_XX_name
+**Feature Branch**: `[###-feature-name]`  
+**Created**: [DATE]  
+**Status**: Draft  
+**Input**: User description: "$ARGUMENTS"
 
----
+## User Scenarios & Testing *(mandatory)*
 
-## Overview
+<!--
+  IMPORTANT: User stories should be PRIORITIZED as user journeys ordered by importance.
+  Each user story/journey must be INDEPENDENTLY TESTABLE - meaning if you implement just ONE of them,
+  you should still have a viable MVP (Minimum Viable Product) that delivers value.
+  
+  Assign priorities (P1, P2, P3, etc.) to each story, where P1 is the most critical.
+  Think of each story as a standalone slice of functionality that can be:
+  - Developed independently
+  - Tested independently
+  - Deployed independently
+  - Demonstrated to users independently
+-->
 
-[Brief description of the feature - 2-3 sentences]
+### User Story 1 - [Brief Title] (Priority: P1)
 
-## FSD Context
+[Describe this user journey in plain language]
 
-### Related Modules
-- `module_XX_name` - [relationship]
-- `module_YY_name` - [relationship]
+**Why this priority**: [Explain the value and why it has this priority level]
 
-### Existing Business Rules
-[Summary of relevant existing rules from FSD]
+**Independent Test**: [Describe how this can be tested independently - e.g., "Can be fully tested by [specific action] and delivers [specific value]"]
 
----
+**Acceptance Scenarios**:
 
-## User Stories
-
-### Story 1: [Title]
-
-**As a** [role]
-**I want to** [action]
-**So that** [benefit]
-
-#### Acceptance Criteria
-
-```gherkin
-Given [context]
-When [action]
-Then [outcome]
-```
+1. **Given** [initial state], **When** [action], **Then** [expected outcome]
+2. **Given** [initial state], **When** [action], **Then** [expected outcome]
 
 ---
 
-## Requirements
+### User Story 2 - [Brief Title] (Priority: P2)
+
+[Describe this user journey in plain language]
+
+**Why this priority**: [Explain the value and why it has this priority level]
+
+**Independent Test**: [Describe how this can be tested independently]
+
+**Acceptance Scenarios**:
+
+1. **Given** [initial state], **When** [action], **Then** [expected outcome]
+
+---
+
+### User Story 3 - [Brief Title] (Priority: P3)
+
+[Describe this user journey in plain language]
+
+**Why this priority**: [Explain the value and why it has this priority level]
+
+**Independent Test**: [Describe how this can be tested independently]
+
+**Acceptance Scenarios**:
+
+1. **Given** [initial state], **When** [action], **Then** [expected outcome]
+
+---
+
+[Add more user stories as needed, each with an assigned priority]
+
+### Edge Cases
+
+<!--
+  ACTION REQUIRED: The content in this section represents placeholders.
+  Fill them out with the right edge cases.
+-->
+
+- What happens when [boundary condition]?
+- How does system handle [error scenario]?
+
+## Requirements *(mandatory)*
+
+<!--
+  ACTION REQUIRED: The content in this section represents placeholders.
+  Fill them out with the right functional requirements.
+-->
 
 ### Functional Requirements
 
-| ID | Requirement | Priority |
-|----|-------------|----------|
-| FR-001 | [Description] | Must Have |
-| FR-002 | [Description] | Should Have |
+- **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
+- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]  
+- **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
+- **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
+- **FR-005**: System MUST [behavior, e.g., "log all security events"]
 
-### Non-Functional Requirements
+*Example of marking unclear requirements:*
 
-| ID | Requirement | Target |
-|----|-------------|--------|
-| NFR-001 | Response time | < 200ms |
-| NFR-002 | Availability | 99.9% |
+- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
+- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
----
+### Key Entities *(include if feature involves data)*
 
-## Business Rules
+- **[Entity 1]**: [What it represents, key attributes without implementation]
+- **[Entity 2]**: [What it represents, relationships to other entities]
 
-| Rule ID | Description | Error Message |
-|---------|-------------|---------------|
-| BR-001 | [Rule description] | [Error message if violated] |
+## Success Criteria *(mandatory)*
 
----
+<!--
+  ACTION REQUIRED: Define measurable success criteria.
+  These must be technology-agnostic and measurable.
+-->
 
-## API Specification
+### Measurable Outcomes
 
-### Endpoints
-
-#### POST /api/v1/[resource]
-
-**Request:**
-```json
-{
-  "field": "value"
-}
-```
-
-**Response:**
-```json
-{
-  "id": "uuid",
-  "field": "value",
-  "createdAt": "2025-01-01T00:00:00Z"
-}
-```
-
-**Error Responses:**
-- `400 Bad Request` - Validation error
-- `401 Unauthorized` - Not authenticated
-- `403 Forbidden` - Not authorized
-
----
-
-## Data Model
-
-```mermaid
-erDiagram
-    ENTITY {
-        uuid id PK
-        string name
-        datetime created_at
-    }
-```
-
----
-
-## UI/UX (if applicable)
-
-### Wireframe
-[Description or link to wireframe]
-
-### User Flow
-```mermaid
-flowchart LR
-    A[Start] --> B[Step 1]
-    B --> C[Step 2]
-    C --> D[End]
-```
-
----
-
-## FSD Updates Required
-
-After implementation, update:
-- [ ] `module_XX_name/INDEX.md` - Add new endpoint/field
-- [ ] `module_XX_name/XX_submodule/spec.md` - Update specification
-- [ ] `FSD_TASK_LIST.md` - Update progress
-
----
-
-## Open Questions
-
-| # | Question | Decision | Decided By |
-|---|----------|----------|------------|
-| 1 | [Question] | [Decision or TBD] | [Name] |
-
----
-
-## Approvals
-
-| Role | Name | Date | Signature |
-|------|------|------|-----------|
-| Product Owner | | | |
-| Tech Lead | | | |
+- **SC-001**: [Measurable metric, e.g., "Users can complete account creation in under 2 minutes"]
+- **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
+- **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
+- **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
