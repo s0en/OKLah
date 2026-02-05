@@ -65,6 +65,25 @@ docs/fsd/
         └── spec.md               # Detailed specification
 ```
 
+## Source of Truth (Non-Negotiable)
+
+This project does NOT use the default Spec Kit `specs/` directory.
+
+Authoritative specifications MUST live under:
+
+- `docs/fsd/**/spec.md`  ← Functional specifications (FSD)
+- `docs/fsd/**/plan.md`  ← Implementation plans
+- `docs/fsd/**/tasks.md` ← Task breakdowns
+
+The following directories are NOT sources of truth and MUST NOT be created
+or used by automation:
+
+- `specs/`
+- `specs/**`
+
+If any tool proposes creating or moving specs into `specs/`,
+that behavior MUST be overridden.
+
 ---
 
 ## Reconciliation with Old FSD

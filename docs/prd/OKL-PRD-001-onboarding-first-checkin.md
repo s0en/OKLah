@@ -1,45 +1,86 @@
-# OKL-PRD-001 — OKLah — Onboarding + First Check-in
+OKL-PRD-001 — Onboarding & First Check-in
+
 Status: Draft
-Derived From: OKL-BRD-001 (BR-OKL-001, BR-OKL-002)
-Goal: Get users to first value fast (anonymous onboarding + first check-in)
+Owner: Product Owner (PO)
+Derived from: OKL-BRD-001
+Related Business Rules: BR-OKL-001, BR-OKL-002, BR-OKL-003, BR-OKL-004, BR-OKL-007
+Related Capabilities: CAP-OKL-001, CAP-OKL-002, CAP-OKL-005
+Date: YYYY-MM-DD
 
-## 1. Problem / opportunity
-Users will abandon if onboarding feels invasive or long. We need a privacy-first path to “first check-in” in under 2 minutes.
+## 1. Problem Statement
 
-## 2. Scope (in)
-- Privacy-first intro screen(s)
-- Anonymous sign-in (Firebase Anonymous Auth)
-- Home screen with one-tap “I’m OK” check-in
-- Basic confirmation UI (timestamp + “you’re checked in”)
-- First streak initialization (Day 1)
+New users must quickly understand OKLah’s privacy-first intent and reach their first moment of value without friction. 
 
-## 3. Out of scope
-- Advanced settings
-- Nudges/escalation
-- Achievements beyond streak start
-- Emergency contacts
+Any complexity or ambiguity during first use risks abandonment before engagement begins.
 
-## 4. User experience requirements
-- Show concise privacy statement (no long legal wall)
-- One primary CTA: “Start”
-- Home screen: single dominant action “I’m OK”
-- Confirmation: show last check-in time
+2. User Intent
 
-## 5. Functional requirements (FR)
-FR-001: The system shall allow anonymous account creation automatically on first launch.
-FR-002: The system shall record a check-in event when user taps “I’m OK”.
-FR-003: The system shall persist last check-in timestamp locally and in backend store.
-FR-004: The system shall display last check-in time on home screen.
-FR-005: The system shall initialize streak to 1 on first successful check-in.
+As a new user,
+I want to start using OKLah immediately without creating an account,
+so that I can check in with confidence and minimal effort.
 
-## 6. Acceptance criteria
-AC-001: New install → first check-in can be completed in < 2 minutes.
-AC-002: No personal identity field is required (name/phone/email optional but not required).
-AC-003: Home displays last check-in time immediately after check-in.
-AC-004: Check-in persists across app restarts.
+## 3. Goals
 
-## 7. Analytics (minimum events)
-- event: onboarding_start
-- event: onboarding_complete
-- event: checkin_completed
-Properties: user_id (anon), timestamp, app_version
+- G-01 Enable immediate, anonymous access to OKLah.
+- G-02 Clearly communicate privacy principles at first use.
+- G-03 Guide users to complete their first daily check-in.
+
+## 4. Non-Goals
+
+- NG-01 Account registration or identity verification.
+- NG-02 Cross-device recovery (handled by PRD-004).
+- NG-03 Social sharing or community onboarding.
+
+## 5. In Scope
+
+- Anonymous first-time access.
+- Initial privacy transparency.
+- First successful daily check-in.
+
+## 6. Out of Scope
+
+- Long-term engagement mechanics.
+- Missed check-in handling.
+- Achievements or streak rewards.
+
+##7. Success Metrics
+
+- % of installs completing first check-in.
+- Time from first open to first check-in.
+- Drop-off rate during onboarding.
+
+## 8. Constraints (Inherited)
+
+- Anonymous by default (BR-OKL-001).
+- Privacy-first data minimization (BR-OKL-002).
+- One check-in per calendar day (BR-OKL-003).
+- Base timezone anchored at first check-in (BR-OKL-004).
+- Privacy transparency at first use (BR-OKL-007).
+
+## 9. Risks & Trade-offs
+- R-01 Over-explaining privacy may slow onboarding.
+- R-02 Too little explanation may reduce trust.
+
+Trade-off: Favor clarity over speed, without adding friction.
+
+## 10. Open Decisions
+
+None.
+
+## 11. FSD Decomposition (authoritative)
+
+This PRD SHALL be decomposed into the following FSD submodules:
+
+- onboarding/anonymous_onboarding
+Rationale: Covers first-time access, privacy disclosure, and anonymous session creation with distinct lifecycle and failure modes.
+
+- onboarding/first_checkin
+Rationale: Represents the first value-realization action and must evolve independently from onboarding messaging.
+
+Decomposition rationale summary
+Separating onboarding from first check-in isolates trust-building from engagement mechanics, reducing complexity and improving clarity.
+
+## 12. Acceptance Boundary
+
+- BA will derive FSD specs only.
+- No UI, API, or technical design decisions are made here.

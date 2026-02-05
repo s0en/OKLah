@@ -1,39 +1,86 @@
-# OKL-PRD-003 — OKLah — Streaks + Basic Achievements + Beta Feedback
+OKL-PRD-003 — Streaks, Achievements & Feedback
+
 Status: Draft
-Derived From: OKL-BRD-001 (BR-OKL-006, BR-OKL-008)
-Goal: Improve retention and capture beta learning quickly
+Owner: Product Owner (PO)
+Derived from: OKL-BRD-001
+Related Business Rules: BR-OKL-003, BR-OKL-004, BR-OKL-005, BR-OKL-006
+Related Capabilities: CAP-OKL-003, CAP-OKL-004
+Date: YYYY-MM-DD
 
-## 1. Problem / opportunity
-Even a good check-in tool fails if users don’t form the habit. Lightweight streaks + a feedback channel help retention and iteration.
+## 1. Problem Statement
 
-## 2. Scope (in)
-- Streak count visible on home screen
-- Streak rules for increment/reset (simple version)
-- 2–3 basic achievements (e.g., 3-day, 7-day, 14-day streak)
-- “Hall of fame” or simple achievements list
-- Beta feedback channel (in-app form or mailto link)
+Sustained engagement benefits from simple, understandable reinforcement.
+Without clear rules, streaks and rewards can confuse users or undermine trust.
 
-## 3. Out of scope
-- Complex gamification economy
-- Social sharing
-- Leaderboards requiring public identity
+## 2. User Intent
 
-## 4. Functional requirements (FR)
-FR-201: The system shall display current streak count on home.
-FR-202: The system shall increment streak when check-in occurs within same day window rules.
-FR-203: The system shall reset or pause streak based on missed check-in rule (define: reset on missed).
-FR-204: The system shall unlock achievements at defined milestones and display them.
-FR-205: The system shall allow users to submit beta feedback (category + message).
+As a regular user,
+I want to see my consistency acknowledged,
+so that I feel motivated to continue my daily practice.
 
-## 5. Acceptance criteria
-AC-201: After consecutive daily check-ins, streak increments correctly.
-AC-202: After a missed check-in beyond threshold, streak resets (MVP rule).
-AC-203: Achievements unlock at the correct milestones and persist.
-AC-204: Feedback submissions are captured (and visible in logs/store).
+## 3. Goals
 
-## 6. Analytics (minimum events)
-- event: streak_incremented
-- event: streak_reset
-- event: achievement_unlocked
-- event: feedback_submitted
-Properties: streak_count, achievement_id, feedback_category
+- G-01 Track consecutive daily check-ins.
+- G-02 Reset streaks transparently after missed days.
+- G-03 Reinforce engagement with positive feedback.
+
+## 4. Non-Goals
+
+- NG-01 Competitive leaderboards.
+- NG-02 Monetary or tangible rewards.
+- NG-03 Social comparison.
+
+## 5. In Scope
+
+- Streak calculation and reset logic.
+- Achievement evaluation.
+- User-facing feedback messaging.
+
+## 6. Out of Scope
+
+- Advanced gamification systems.
+- Personal coaching or advice.
+- Social features.
+
+## 7. Success Metrics
+
+- Average streak length.
+- % users maintaining 7-day streaks.
+- User satisfaction with feedback clarity.
+
+## 8. Constraints (Inherited)
+
+- One check-in per calendar day (BR-OKL-003).
+- Base timezone anchoring (BR-OKL-004).
+- Streak resets after missed days (BR-OKL-005).
+- Non-punitive reinforcement (BR-OKL-006).
+
+## 9. Risks & Trade-offs
+
+- R-01 Over-gamification may trivialize intent.
+- R-02 Under-feedback may reduce motivation.
+Trade-off: Favor clarity and emotional safety over complexity.
+
+## 10. Open Decisions
+None.
+
+## 11. FSD Decomposition (authoritative)
+
+This PRD SHALL be decomposed into the following FSD submodules:
+
+- gamification/streak_tracking
+Rationale: Core continuity logic with strict correctness requirements.
+
+- gamification/achievement_evaluation
+Rationale: Derived outcomes based on streak state that may expand over time.
+
+- feedback/user_feedback_signals
+Rationale: Messaging and reinforcement behavior should evolve independently of state logic.
+
+Decomposition rationale summary
+Separating durable state from derived rewards and messaging enables safe iteration and clearer ownership.
+
+## 12. Acceptance Boundary
+
+- BA derives FSD specs only.
+- No UI flows, state machines, or technical implementations defined here.
