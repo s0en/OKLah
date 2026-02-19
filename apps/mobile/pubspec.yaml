@@ -1,0 +1,23 @@
+name: oklah
+description: OKLah mobile app — anonymous onboarding and first check-in.
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^3.0.0
+  firebase_auth: ^5.0.0
+  firebase_analytics: ^11.0.0
+  shared_preferences: ^2.2.0
+  cloud_firestore: ^5.0.0
+  cloud_functions: ^5.0.0
+  # forui: ^0.1.0  # Uncomment when forui package is available per PROJECT-CONFIG.md
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
