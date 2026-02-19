@@ -3,23 +3,43 @@ import * as admin from "firebase-admin";
 
 admin.initializeApp();
 
+/** Data payload for recordCheckIn (first check-in sends timezone + source) */
+interface RecordCheckInData {
+  timezone?: string;
+  source?: "first_checkin" | "tap";
+}
+
 /**
  * recordCheckIn
  * - Called by client when user taps "I'm OK"
  * - Writes append-only check-in record
+ * - Accepts optional timezone (persisted to /users/{uid}.baseTimezone once) and source (default "tap")
  * - Updates user streak counters
  */
-export const recordCheckIn = functions.https.onCall(async (data, context) => {
+export const recordCheckIn = functions.https.onCall(async (data: RecordCheckInData, context) => {
   if (!context.auth) throw new functions.https.HttpsError("unauthenticated", "Sign-in required");
   const uid = context.auth.uid;
+
+  const source = data?.source ?? "tap";
+  const timezone = data?.timezone;
 
   const now = admin.firestore.Timestamp.now();
   const checkinRef = admin.firestore().collection("checkins").doc();
   await checkinRef.set({
     uid,
     ts: now,
-    source: "tap",
+    source,
   });
+
+  // One-time base timezone write (BR-OKL-004); do not overwrite if already set
+  if (timezone != null && timezone !== "") {
+    const userRef = admin.firestore().collection("users").doc(uid);
+    const userSnap = await userRef.get();
+    const existing = userSnap.data();
+    if (existing?.baseTimezone == null) {
+      await userRef.set({ baseTimezone: timezone }, { merge: true });
+    }
+  }
 
   // TODO: implement streak logic based on last check-in day
   await admin.firestore().collection("events").add({
