@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 
-/// First check-in: guidance text + "I'm OK" CTA, loading state, PopScope. Spec §4.2, E-FC-005 | Tasks T-04, T-05, T-06
+/// First check-in: guidance text + "I'm OK" CTA, loading state, PopScope. Uses forui FButton per PROJECT-CONFIG. Spec §4.2, E-FC-005 | Tasks T-04, T-05, T-06
 class FirstCheckinScreen extends StatelessWidget {
   const FirstCheckinScreen({
     super.key,
@@ -37,10 +38,11 @@ class FirstCheckinScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                 ],
                 if (loading)
-                  const Center(child: CircularProgressIndicator())
+                  const Center(child: FCircularProgress())
                 else
-                  FilledButton(
-                    onPressed: onCheckin,
+                  FButton(
+                    mainAxisSize: MainAxisSize.min,
+                    onPress: onCheckin != null ? () => onCheckin!() : null,
                     child: const Text('I\'m OK'),
                   ),
               ],

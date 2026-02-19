@@ -164,3 +164,73 @@ No extra setup is required beyond `shared_preferences` in pubspec; ensure `flutt
 - [ ] **P-03** `shared_preferences` in pubspec; used by onboarding router and check-in recording service; `flutter pub get` run.
 
 When all three are done, you can proceed with the remaining implementation tasks from the anonymous onboarding and first check-in task lists.
+
+---
+
+## Troubleshooting
+
+### "Running pod install..." seems stuck (macOS or iOS)
+
+When you run `flutter run` and choose **macOS** (or iOS), the first time CocoaPods runs it has to download and resolve many Firebase-related pods. This can take **15–30+ minutes** and often looks stuck while it is still working.
+
+- **Option 1 — Wait:** Let it run; do not cancel. First-time pod install with Firebase is slow.
+- **Option 2 — See progress:** In a terminal, run:
+  ```bash
+  cd apps/mobile/macos
+  pod install --verbose
+  ```
+  You will see which pod is being fetched. When it finishes, run `flutter run` again (it will be faster next time).
+- **Option 3 — Use iOS simulator:** For quicker iteration, run `flutter run` and choose an **iOS** simulator instead of macOS; iOS pod install can still be slow the first time but is often faster than macOS.
+- **Check:** iOS Podfile has `platform :ios, '13.0'`; macOS Podfile has `platform :osx, '10.15'`. Both match Firebase requirements.
+
+### macOS: "Operation not permitted" / "Lost connection to device" after launch
+
+If the app builds and launches on macOS but then logs a network error (`NSPOSIXErrorDomain Code=1 "Operation not permitted"`) and Flutter reports "Lost connection to device", the app sandbox is blocking **outgoing** network access. Firebase needs outbound HTTPS.
+
+**Fix:** Add the outgoing network entitlement to the macOS Runner:
+
+- **`macos/Runner/DebugProfile.entitlements`** and **`macos/Runner/Release.entitlements`** must include:
+  ```xml
+  <key>com.apple.security.network.client</key>
+  <true/>
+  ```
+  This is already added in this project. Then run `flutter run` again (debug uses DebugProfile.entitlements).
+
+### macOS: "firebase_auth/keychain-error" when signing in (e.g. Continue on privacy)
+
+Firebase Auth stores credentials in the Keychain. Sandboxed macOS apps need the **keychain-access-groups** entitlement or you get "An error occurred when accessing the keychain".
+
+**Fix:** Add keychain-access-groups to both entitlement files (already done in this project):
+
+- **`macos/Runner/DebugProfile.entitlements`** and **`macos/Runner/Release.entitlements`** include:
+  ```xml
+  <key>keychain-access-groups</key>
+  <array>
+    <string>$(AppIdentifierPrefix)com.oklah.app</string>
+  </array>
+  ```
+  Use your app’s bundle ID (`com.oklah.app`). `$(AppIdentifierPrefix)` is filled by Xcode from your **Development Team**. You must also enable development signing or the build will fail (see next section).
+
+### macOS: "Runner has entitlements that require signing with a development certificate"
+
+After adding **keychain-access-groups** (for Firebase Auth), the macOS app must be **signed** with a development certificate. If you see:
+
+`"Runner" has entitlements that require signing with a development certificate. Enable development signing in the Signing & Capabilities editor.`
+
+**Fix (one-time):**
+
+1. Open the macOS project in Xcode:
+   ```bash
+   open apps/mobile/macos/Runner.xcworkspace
+   ```
+2. In the left sidebar, click the **Runner** project (blue icon), then select the **Runner** target.
+3. Open the **Signing & Capabilities** tab.
+4. Under **Signing**, check **"Automatically manage signing"**.
+5. In **Team**, choose your Apple ID team (e.g. "Your Name (Personal Team)"). If none appears, click **"Add an Account…"** and sign in with your Apple ID; a free Personal Team will be created.
+6. Close Xcode. From the project root run:
+   ```bash
+   cd apps/mobile && flutter run
+   ```
+   Choose **macOS** again; the build should succeed.
+
+**If you don't want to set up signing yet:** Run on **Android** or **iOS Simulator** instead (`flutter run` and pick an Android device/emulator or an iOS simulator). Those platforms don't require this step for local debug.

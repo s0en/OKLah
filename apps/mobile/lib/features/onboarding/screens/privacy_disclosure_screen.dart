@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 
 /// Privacy disclosure: 3 content points + Continue CTA. Block passive dismissal.
-/// Spec §4.2, VR-AO-001, AC-AO-02, AC-AO-03 | Tasks T-04, T-05, T-06, T-10, T-14
+/// Uses forui FButton per PROJECT-CONFIG. Spec §4.2, VR-AO-001, AC-AO-02, AC-AO-03 | Tasks T-04, T-05, T-06, T-10, T-14
 class PrivacyDisclosureScreen extends StatelessWidget {
   const PrivacyDisclosureScreen({
     super.key,
@@ -34,14 +35,19 @@ class PrivacyDisclosureScreen extends StatelessWidget {
                 if (error != null) ...[
                   const SizedBox(height: 16),
                   Text(error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
-                  FilledButton(onPressed: onContinue, child: const Text('Try Again')),
+                  FButton(
+                    mainAxisSize: MainAxisSize.min,
+                    onPress: onContinue != null ? () => onContinue!() : null,
+                    child: const Text('Try Again'),
+                  ),
                 ] else ...[
                   const Spacer(),
                   if (loading)
-                    const Center(child: CircularProgressIndicator())
+                    const Center(child: FCircularProgress())
                   else
-                    FilledButton(
-                      onPressed: onContinue,
+                    FButton(
+                      mainAxisSize: MainAxisSize.min,
+                      onPress: onContinue != null ? () => onContinue!() : null,
                       child: const Text('Continue'),
                     ),
                 ],

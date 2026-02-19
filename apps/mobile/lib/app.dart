@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'features/onboarding/services/onboarding_router.dart';
 import 'features/onboarding/services/anonymous_auth_service.dart';
 import 'features/onboarding/services/onboarding_analytics.dart';
@@ -8,15 +9,22 @@ import 'features/onboarding/screens/first_checkin_stub_screen.dart';
 // import 'features/main/screens/main_experience_stub_screen.dart'; // when main experience implemented
 
 /// Root app widget. Wire onboarding_router into [MaterialApp] so gate runs before any screen.
-/// Spec: anonymous_onboarding §4.1, VR-AO-002 | Task T-02
+/// FTheme wraps the app for forui widgets (PROJECT-CONFIG). Spec: anonymous_onboarding §4.1, VR-AO-002 | Task T-02
 class OKLahApp extends StatelessWidget {
   const OKLahApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = FThemes.neutral.light;
     return MaterialApp(
       title: 'OKLah',
-      theme: ThemeData(useMaterial3: true),
+      theme: theme.toApproximateMaterialTheme(),
+      supportedLocales: FLocalizations.supportedLocales,
+      localizationsDelegates: const [...FLocalizations.localizationsDelegates],
+      builder: (_, child) => FTheme(
+        data: theme,
+        child: FToaster(child: FTooltipGroup(child: child ?? const SizedBox.shrink())),
+      ),
       home: const _OnboardingGate(),
     );
   }
